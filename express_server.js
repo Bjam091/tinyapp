@@ -1,9 +1,11 @@
 const express = require("express");
 const app = express();
 const PORT = 8080;
+const cookieParser = require('cookie-parser')
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser())
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -64,6 +66,11 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
 });
 
+app.post("/urls/signIn", (req,res) => {
+  res.cookie("username", req.body.username)
+  res.redirect("/urls")
+})
+
 app.post("/urls/:shortURL", (req,res) => {
   urlDatabase[req.params.shortURL] = req.body.longURL;
   res.redirect("/urls");
@@ -73,3 +80,4 @@ app.post("/urls/:shortURL/delete", (req,res) => {
   delete urlDatabase[req.params.shortURL]
   res.redirect("/urls") 
 });
+
