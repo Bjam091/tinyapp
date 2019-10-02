@@ -12,6 +12,19 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+
 const generateRandomString = function() {
   let result = '';
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -32,8 +45,8 @@ app.get("/urls", (req, res) => {
 
 app.post("/urls", (req, res) => {
   let shortenedUrl = generateRandomString();
-  res.redirect(`/urls/${shortenedUrl}`);
   urlDatabase[shortenedUrl] = req.body.longURL;
+  res.redirect(`/urls/${shortenedUrl}`);
 });
 
 app.get("/urls/new", (req, res) => {
@@ -41,6 +54,13 @@ app.get("/urls/new", (req, res) => {
     username: req.cookies["username"], 
   };
   res.render("urls_new", templateVars);
+});
+
+app.get("/register", (req,res) => {
+  let templateVars = {
+    username:req.cookies["username"],
+  };
+  res.render("urls_register", templateVars)
 });
 
 app.get("/urls/:shortURL", (req, res) => {
@@ -67,6 +87,8 @@ app.get("/hello", (req,res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
 });
@@ -87,7 +109,17 @@ app.post("/urls/:shortURL", (req,res) => {
 });
 
 app.post("/urls/:shortURL/delete", (req,res) => {
-  delete urlDatabase[req.params.shortURL]
+  delete urlDatabase[req.params.shortURL];
   res.redirect("/urls") 
 });
 
+app.post("/register", (req,res) => {
+  userID = generateRandomString();
+  users[userID] = { id: userID, 
+    email: req.body.email, 
+    password: req.body.password 
+  };
+ 
+ console.log(users)
+  res.redirect("/urls")
+});
