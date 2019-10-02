@@ -35,13 +35,22 @@ const generateRandomString = function() {
   return result;
 };
 
+const getUser = (req, res) => {
+  const cookie = req.cookies["user_id"];
+  const user = users[cookie];
+
+  return user;
+}
+
 
 app.set("view engine", "ejs");
 
 
 //renders the urls index page
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase, username: req.cookies["username"], };
+  const user = getUser(req, res);
+
+  let templateVars = { urls: urlDatabase, user: user, };
   res.render("urls_index", templateVars);
 });
 
@@ -54,25 +63,38 @@ app.post("/urls", (req, res) => {
 
 //renders the url new page
 app.get("/urls/new", (req, res) => {
+  const user = getUser(req, res);
+
   let templateVars = {
-    username: req.cookies["username"],
+    user: user,
   };
   res.render("urls_new", templateVars);
 });
 
 //renders the register page
 app.get("/register", (req,res) => {
+  const user = getUser(req, res);
+
   let templateVars = {
-    username:req.cookies["username"],
+    user: user,
   };
   res.render("urls_register", templateVars);
 });
 
+//renders the login page
+app.get("/login", (req,res) => {
+  let user;
+  let templateVars = {user: user};
+  res.render("urls_login", templateVars);
+});
+
 //renders the shortURL page
 app.get("/urls/:shortURL", (req, res) => {
+  const user = getUser(req, res);
+
   let templateVars = { shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
-    username: req.cookies["username"] };
+    user: user };
   res.render("urls_show", templateVars);
 });
 
@@ -101,14 +123,26 @@ app.listen(PORT, () => {
 });
 
 //logs a user in
-app.post("/urls/signIn", (req,res) => {
-  res.cookie("username", req.body.username);
-  res.redirect("/urls");
+app.post("/login", (req,res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  const userKeys = Object.keys(users);
+  userKeys.forEach((user) => {
+    let value = users[user];
+    if(email === value.email && password === value.password){
+      res.cookie("user_id", users[user].id);
+      res.redirect("/urls");
+    } 
+    else if(email === value.email && password !== value.password) {
+        res.status(403).end();
+      }
+    })
 });
 
 //logs a user out
 app.post("/urls/logout", (req,res) => {
-  res.clearCookie("username", req.body.username);
+  res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
@@ -142,6 +176,6 @@ app.post("/register", (req,res) => {
     email: req.body.email,
     password: req.body.password
   };
-  
+  res.cookie("user_id", users[userID].id);
   res.redirect("/urls");
 });
