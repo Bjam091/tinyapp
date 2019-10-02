@@ -126,6 +126,9 @@ app.listen(PORT, () => {
 app.post("/login", (req,res) => {
   const email = req.body.email;
   const password = req.body.password;
+  if(req.body.email === ""){
+    res.status(403).end();
+  }
 
   const userKeys = Object.keys(users);
   userKeys.forEach((user) => {
@@ -134,7 +137,7 @@ app.post("/login", (req,res) => {
       res.cookie("user_id", users[user].id);
       res.redirect("/urls");
     } 
-    else if(email === value.email && password !== value.password) {
+    else {
         res.status(403).end();
       }
     })
