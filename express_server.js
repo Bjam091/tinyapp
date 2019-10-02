@@ -179,6 +179,7 @@ app.post("/register", (req,res) => {
   if (req.body.email === "" || req.body.password === ""){
     return res.status(400).end();
   }
+
   for(let uID in users){
     let value = users[uID];
     if(value.email === req.body.email){
@@ -186,6 +187,7 @@ app.post("/register", (req,res) => {
     } 
   }
   let userID = generateRandomString();
+  
   users[userID] = { id: userID,
     email: req.body.email,
     password: req.body.password
