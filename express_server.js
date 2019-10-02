@@ -64,11 +64,17 @@ app.post("/urls", (req, res) => {
 //renders the url new page
 app.get("/urls/new", (req, res) => {
   const user = getUser(req, res);
+ 
+  if(user){
+
 
   let templateVars = {
     user: user,
   };
   res.render("urls_new", templateVars);
+} else {
+  res.redirect("/login");
+}
 });
 
 //renders the register page
@@ -130,18 +136,15 @@ app.post("/login", (req,res) => {
     res.status(403).end();
     return
   }
-
+  
   const userKeys = Object.keys(users);
   let userId = null
   userKeys.forEach((user) => {
     let value = users[user];
     if(email === value.email && password === value.password){
       userId = users[user].id
-      
     }
   }); 
-
-    
 
     if (userId !== null){
       res.cookie("user_id", userId);
