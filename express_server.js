@@ -44,6 +44,12 @@ const getUser = (req, res) => {
   return user;
 }
 
+const longURLDatabase = () => {
+  let name = new Object()
+  for(let shortURL in urlDatabase){
+    name[shortURL] = urlDatabase[shortURL].longURL;
+  } return name
+}
 
 app.set("view engine", "ejs");
 
@@ -51,14 +57,14 @@ app.set("view engine", "ejs");
 //renders the urls index page
 app.get("/urls", (req, res) => {
   const user = getUser(req, res);
+  
 
-  let templateVars = { urls: urlDatabase, user: user, };
+  let templateVars = { urls: longURLDatabase(), user: user, };
   res.render("urls_index", templateVars);
 });
 
 //creates a new short URL for a link
 app.post("/urls", (req, res) => {
-  const user = getUser(req, res);
   let shortenedUrl = generateRandomString();
   for(let uID in users){
     let value = users[uID];
@@ -111,14 +117,14 @@ app.get("/urls/:shortURL", (req, res) => {
   const user = getUser(req, res);
 
   let templateVars = { shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
+    longURL: urlDatabase[req.params.shortURL].longURL,
     user: user };
   res.render("urls_show", templateVars);
 });
 
 //redirects the short url to the long url
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
 
