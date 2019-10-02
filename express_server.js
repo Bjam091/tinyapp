@@ -126,21 +126,29 @@ app.listen(PORT, () => {
 app.post("/login", (req,res) => {
   const email = req.body.email;
   const password = req.body.password;
-  if(req.body.email === ""){
+  if(req.body.email === undefined){
     res.status(403).end();
+    return
   }
 
   const userKeys = Object.keys(users);
+  let userId = null
   userKeys.forEach((user) => {
     let value = users[user];
     if(email === value.email && password === value.password){
-      res.cookie("user_id", users[user].id);
+      userId = users[user].id
+      
+    }
+  }); 
+
+    
+
+    if (userId !== null){
+      res.cookie("user_id", userId);
       res.redirect("/urls");
-    } 
-    else {
-        res.status(403).end();
-      }
-    })
+    } else {
+      res.status(403).end();
+    }
 });
 
 //logs a user out
