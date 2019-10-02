@@ -8,9 +8,11 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b2xVn2: { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID"},
+  tsm5xK: { longURL: "http://www.google.com", userID: "userRandomID"}
 };
+
+
 
 const users = {
   "userRandomID": {
@@ -56,9 +58,19 @@ app.get("/urls", (req, res) => {
 
 //creates a new short URL for a link
 app.post("/urls", (req, res) => {
+  const user = getUser(req, res);
   let shortenedUrl = generateRandomString();
-  urlDatabase[shortenedUrl] = req.body.longURL;
+  for(let uID in users){
+    let value = users[uID];
+
+
+  urlDatabase[shortenedUrl] = {
+    longURL: req.body.longURL,
+    userID: value.id
+  }
+}
   res.redirect(`/urls/${shortenedUrl}`);
+  console.log(urlDatabase)
 });
 
 //renders the url new page
@@ -187,7 +199,7 @@ app.post("/register", (req,res) => {
     } 
   }
   let userID = generateRandomString();
-  
+
   users[userID] = { id: userID,
     email: req.body.email,
     password: req.body.password
