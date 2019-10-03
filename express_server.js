@@ -10,23 +10,23 @@ app.use(cookieParser());
 app.set("view engine", "ejs");
 
 const urlDatabase = {
-  b2xVn2: { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID"},
-  tsm5xK: { longURL: "http://www.google.com", userID: "userRandomID"}
+  // b2xVn2: { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID"},
+  // tsm5xK: { longURL: "http://www.google.com", userID: "userRandomID"}
 };
 
 
 
 const users = {
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur"
-  },
-  "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
-  }
+  // "userRandomID": {
+  //   id: "userRandomID",
+  //   email: "user@example.com",
+  //   password: "purple-monkey-dinosaur"
+  // },
+  // "user2RandomID": {
+  //   id: "user2RandomID",
+  //   email: "user2@example.com",
+  //   password: "dishwasher-funk"
+  // }
 };
 
 const generateRandomString = function() {
@@ -162,6 +162,8 @@ app.listen(PORT, () => {
 app.post("/login", (req,res) => {
   const email = req.body.email;
   const password = req.body.password;
+  
+
   if(req.body.email === undefined){
     res.status(403).end();
     return
@@ -171,7 +173,7 @@ app.post("/login", (req,res) => {
   let userId = null
   userKeys.forEach((user) => {
     let value = users[user];
-    if(email === value.email && password === value.password){
+    if(email === value.email && bcrypt.compareSync(password, value.password)){
       userId = users[user].id
     }
   }); 
@@ -227,11 +229,14 @@ app.post("/register", (req,res) => {
     } 
   }
   let userID = generateRandomString();
+  let hashedPassword = bcrypt.hashSync(req.body.password, 10)
 
   users[userID] = { id: userID,
     email: req.body.email,
-    password: req.body.password
+    password: hashedPassword
   };
+
+
   res.cookie("user_id", users[userID].id);
   res.redirect("/urls");
 });
