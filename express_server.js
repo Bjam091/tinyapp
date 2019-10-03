@@ -53,13 +53,32 @@ const longURLDatabase = () => {
 
 app.set("view engine", "ejs");
 
+const urlsForUserID = (userId) => {
+  console.log(userId)
+  let filterUrls = new Object()
+  for (let shortUrl in urlDatabase){
+    if( urlDatabase[shortUrl].userID === userId) {
+      filterUrls[shortUrl] = urlDatabase[shortUrl].longURL;
+    } 
+  } return filterUrls;
+}
+
+// const filterID = (userID) => {
+// let newArray = [];
+// for (let shortUrl in urlDatabase){
+//   if(urlDatabase[shortUrl].ID === userID)
+// }
+// }
+
+
+
+
 
 //renders the urls index page
 app.get("/urls", (req, res) => {
   const user = getUser(req, res);
-  
+  let templateVars = { urls: urlsForUserID(req.cookies["user_id"]), user: user, };
 
-  let templateVars = { urls: longURLDatabase(), user: user, };
   res.render("urls_index", templateVars);
 });
 
@@ -76,7 +95,7 @@ app.post("/urls", (req, res) => {
   }
 }
   res.redirect(`/urls/${shortenedUrl}`);
-  console.log(urlDatabase)
+
 });
 
 //renders the url new page
@@ -180,7 +199,7 @@ app.post("/urls/logout", (req,res) => {
 
 //replaces a URL
 app.post("/urls/:shortURL", (req,res) => {
-  urlDatabase[req.params.shortURL] = req.body.longURL;
+  urlDatabase[req.params.shortURL].longURL = req.body.longURL;
   res.redirect("/urls");
 });
 
