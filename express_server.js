@@ -103,10 +103,15 @@ app.get("/urls/new", (req, res) => {
 app.get("/register", (req,res) => {
   const user = getUser(req, res);
 
+  if(user) {
+    res.redirect("/urls")
+  } else {
+
   let templateVars = {
     user: user,
   };
   res.render("urls_register", templateVars);
+}
 });
 
 //renders the login page
@@ -133,8 +138,14 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+
+// for the / url, sends users to the correct place
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  const user = getUser(req, res);
+  if (user) {
+    res.redirect("/urls")
+  } else 
+  res.redirect("/login");
 });
 
 app.get("/urls.json", (req, res) => {
