@@ -44,7 +44,7 @@ const getUser = (req, res) => {
   const user = users[cookie];
 
   return user;
-}
+};
 
 // const longURLDatabase = () => {
 //   let name = new Object()
@@ -56,13 +56,13 @@ const getUser = (req, res) => {
 
 
 const urlsForUserID = (userId) => {
-  let filterUrls = new Object()
-  for (let shortUrl in urlDatabase){
-    if( urlDatabase[shortUrl].userID === userId) {
+  let filterUrls = new Object();
+  for (let shortUrl in urlDatabase) {
+    if (urlDatabase[shortUrl].userID === userId) {
       filterUrls[shortUrl] = urlDatabase[shortUrl].longURL;
-    } 
+    }
   } return filterUrls;
-}
+};
 
 
 
@@ -77,15 +77,15 @@ app.get("/urls", (req, res) => {
 //creates a new short URL for a link
 app.post("/urls", (req, res) => {
   let shortenedUrl = generateRandomString();
-  for(let uID in users){
+  for (let uID in users) {
     let value = users[uID];
 
 
-  urlDatabase[shortenedUrl] = {
-    longURL: req.body.longURL,
-    userID: value.id
+    urlDatabase[shortenedUrl] = {
+      longURL: req.body.longURL,
+      userID: value.id
+    };
   }
-}
   res.redirect(`/urls/${shortenedUrl}`);
 
 });
@@ -94,16 +94,16 @@ app.post("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const user = getUser(req, res);
  
-  if(user){
+  if (user) {
 
 
-  let templateVars = {
-    user: user,
-  };
-  res.render("urls_new", templateVars);
-} else {
-  res.redirect("/login");
-}
+    let templateVars = {
+      user: user,
+    };
+    res.render("urls_new", templateVars);
+  } else {
+    res.redirect("/login");
+  }
 });
 
 //renders the register page
@@ -164,26 +164,26 @@ app.post("/login", (req,res) => {
   const password = req.body.password;
   
 
-  if(req.body.email === undefined){
+  if (req.body.email === undefined) {
     res.status(403).end();
-    return
+    return;
   }
   
   const userKeys = Object.keys(users);
-  let userId = null
+  let userId = null;
   userKeys.forEach((user) => {
     let value = users[user];
-    if(email === value.email && bcrypt.compareSync(password, value.password)){
-      userId = users[user].id
+    if (email === value.email && bcrypt.compareSync(password, value.password)) {
+      userId = users[user].id;
     }
-  }); 
+  });
 
-    if (userId !== null){
-      res.cookie("user_id", userId);
-      res.redirect("/urls");
-    } else {
-      res.status(403).end();
-    }
+  if (userId !== null) {
+    res.cookie("user_id", userId);
+    res.redirect("/urls");
+  } else {
+    res.status(403).end();
+  }
 });
 
 //logs a user out
@@ -194,22 +194,22 @@ app.post("/urls/logout", (req,res) => {
 
 //edit a URL
 app.post("/urls/:shortURL", (req,res) => {
-  let currentUser = req.cookies["user_id"]
-  let urlOwner = urlDatabase[req.params.shortURL].userID
+  let currentUser = req.cookies["user_id"];
+  let urlOwner = urlDatabase[req.params.shortURL].userID;
 
-  if(currentUser === urlOwner){
-  urlDatabase[req.params.shortURL].longURL = req.body.longURL;
+  if (currentUser === urlOwner) {
+    urlDatabase[req.params.shortURL].longURL = req.body.longURL;
   }
   res.redirect("/urls");
 });
 
 //deletes a URL
 app.post("/urls/:shortURL/delete", (req,res) => {
-  let currentUser = req.cookies["user_id"]
-  let urlOwner = urlDatabase[req.params.shortURL].userID
+  let currentUser = req.cookies["user_id"];
+  let urlOwner = urlDatabase[req.params.shortURL].userID;
 
-  if(currentUser === urlOwner){
-  delete urlDatabase[req.params.shortURL];
+  if (currentUser === urlOwner) {
+    delete urlDatabase[req.params.shortURL];
   }
   res.redirect("/urls");
 });
@@ -218,18 +218,18 @@ app.post("/urls/:shortURL/delete", (req,res) => {
 app.post("/register", (req,res) => {
 
 
-  if (req.body.email === "" || req.body.password === ""){
+  if (req.body.email === "" || req.body.password === "") {
     return res.status(400).end();
   }
 
-  for(let uID in users){
+  for (let uID in users) {
     let value = users[uID];
-    if(value.email === req.body.email){
+    if (value.email === req.body.email) {
       return res.status(400).end();
-    } 
+    }
   }
   let userID = generateRandomString();
-  let hashedPassword = bcrypt.hashSync(req.body.password, 10)
+  let hashedPassword = bcrypt.hashSync(req.body.password, 10);
 
   users[userID] = { id: userID,
     email: req.body.email,
