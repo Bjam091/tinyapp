@@ -3,8 +3,8 @@ const app = express();
 const PORT = 8080;
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
-
 const bodyParser = require("body-parser");
+const getUserByEmail = require("./helpers.js")
 
 app.use(bodyParser.urlencoded({extended: true}));
 
@@ -15,14 +15,7 @@ app.use(cookieSession({
 }));
 app.set("view engine", "ejs");
 
-const getUserByEmail = function(email, users) {
-  for (let uID in users) {
-    if (users[uID].email === email) {
 
-    return users[uID];
-  } 
-} return null
-}
 
 
 const urlDatabase = {
