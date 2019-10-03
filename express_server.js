@@ -1,12 +1,18 @@
 const express = require("express");
 const app = express();
 const PORT = 8080;
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 
 const bodyParser = require("body-parser");
+
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser());
+
+app.use(cookieSession({
+  name: 'user_id',
+  keys: ["boop"],
+  maxAge: 24 * 60 * 60 * 1000
+}))
 app.set("view engine", "ejs");
 
 const urlDatabase = {
@@ -40,7 +46,7 @@ const generateRandomString = function() {
 };
 
 const getUser = (req, res) => {
-  const cookie = req.cookies["user_id"];
+  const cookie = req.session["user_id"];
   const user = users[cookie];
 
   return user;
@@ -69,7 +75,7 @@ const urlsForUserID = (userId) => {
 //renders the urls index page
 app.get("/urls", (req, res) => {
   const user = getUser(req, res);
-  let templateVars = { urls: urlsForUserID(req.cookies["user_id"]), user: user, };
+  let templateVars = { urls: urlsForUserID(req.session["user_id"]), user: user, };
 
   res.render("urls_index", templateVars);
 });
@@ -179,7 +185,7 @@ app.post("/login", (req,res) => {
   });
 
   if (userId !== null) {
-    res.cookie("user_id", userId);
+    req.session["user_id"] = userId;
     res.redirect("/urls");
   } else {
     res.status(403).end();
@@ -188,13 +194,13 @@ app.post("/login", (req,res) => {
 
 //logs a user out
 app.post("/urls/logout", (req,res) => {
-  res.clearCookie("user_id");
+  req.session =  null;
   res.redirect("/urls");
 });
 
 //edit a URL
 app.post("/urls/:shortURL", (req,res) => {
-  let currentUser = req.cookies["user_id"];
+  let currentUser = req.session["user_id"];
   let urlOwner = urlDatabase[req.params.shortURL].userID;
 
   if (currentUser === urlOwner) {
@@ -205,7 +211,7 @@ app.post("/urls/:shortURL", (req,res) => {
 
 //deletes a URL
 app.post("/urls/:shortURL/delete", (req,res) => {
-  let currentUser = req.cookies["user_id"];
+  let currentUser = req.session["user_id"];
   let urlOwner = urlDatabase[req.params.shortURL].userID;
 
   if (currentUser === urlOwner) {
@@ -237,6 +243,6 @@ app.post("/register", (req,res) => {
   };
 
 
-  res.cookie("user_id", users[userID].id);
+  req.session["user_id"] = users[userID].id;
   res.redirect("/urls");
 });
