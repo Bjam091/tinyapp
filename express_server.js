@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
+app.set("view engine", "ejs");
 
 const urlDatabase = {
   b2xVn2: { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID"},
@@ -44,17 +45,16 @@ const getUser = (req, res) => {
   return user;
 }
 
-const longURLDatabase = () => {
-  let name = new Object()
-  for(let shortURL in urlDatabase){
-    name[shortURL] = urlDatabase[shortURL].longURL;
-  } return name
-}
+// const longURLDatabase = () => {
+//   let name = new Object()
+//   for(let shortURL in urlDatabase){
+//     name[shortURL] = urlDatabase[shortURL].longURL;
+//   } return name
+// }
 
-app.set("view engine", "ejs");
+
 
 const urlsForUserID = (userId) => {
-  console.log(userId)
   let filterUrls = new Object()
   for (let shortUrl in urlDatabase){
     if( urlDatabase[shortUrl].userID === userId) {
@@ -62,15 +62,6 @@ const urlsForUserID = (userId) => {
     } 
   } return filterUrls;
 }
-
-// const filterID = (userID) => {
-// let newArray = [];
-// for (let shortUrl in urlDatabase){
-//   if(urlDatabase[shortUrl].ID === userID)
-// }
-// }
-
-
 
 
 
@@ -137,7 +128,8 @@ app.get("/urls/:shortURL", (req, res) => {
 
   let templateVars = { shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL].longURL,
-    user: user };
+    user: user,
+    fakeUser: urlDatabase[req.params.shortURL].userID};
   res.render("urls_show", templateVars);
 });
 
@@ -197,15 +189,25 @@ app.post("/urls/logout", (req,res) => {
   res.redirect("/urls");
 });
 
-//replaces a URL
+//edit a URL
 app.post("/urls/:shortURL", (req,res) => {
+  let currentUser = req.cookies["user_id"]
+  let urlOwner = urlDatabase[req.params.shortURL].userID
+
+  if(currentUser === urlOwner){
   urlDatabase[req.params.shortURL].longURL = req.body.longURL;
+  }
   res.redirect("/urls");
 });
 
 //deletes a URL
 app.post("/urls/:shortURL/delete", (req,res) => {
+  let currentUser = req.cookies["user_id"]
+  let urlOwner = urlDatabase[req.params.shortURL].userID
+
+  if(currentUser === urlOwner){
   delete urlDatabase[req.params.shortURL];
+  }
   res.redirect("/urls");
 });
 
