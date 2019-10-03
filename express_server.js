@@ -15,6 +15,16 @@ app.use(cookieSession({
 }));
 app.set("view engine", "ejs");
 
+const getUserByEmail = function(email, users) {
+  for (let uID in users) {
+    if (users[uID].email === email) {
+
+    return users[uID];
+  } 
+} return null
+}
+
+
 const urlDatabase = {
   // b2xVn2: { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID"},
   // tsm5xK: { longURL: "http://www.google.com", userID: "userRandomID"}
@@ -175,14 +185,13 @@ app.post("/login", (req,res) => {
     return;
   }
   
-  const userKeys = Object.keys(users);
-  let userId = null;
-  userKeys.forEach((user) => {
-    let value = users[user];
-    if (email === value.email && bcrypt.compareSync(password, value.password)) {
-      userId = users[user].id;
-    }
-  });
+  let userId = null
+
+  let user = getUserByEmail(email,users) 
+    if (user && bcrypt.compareSync(password, user.password)) {
+      userId = user.id;
+    } 
+
 
   if (userId !== null) {
     req.session["user_id"] = userId;
@@ -222,18 +231,17 @@ app.post("/urls/:shortURL/delete", (req,res) => {
 
 //register
 app.post("/register", (req,res) => {
-
+ let email = req.body.email
 
   if (req.body.email === "" || req.body.password === "") {
     return res.status(400).end();
   }
 
-  for (let uID in users) {
-    let value = users[uID];
-    if (value.email === req.body.email) {
+ let user = getUserByEmail(email, users)
+    if (user) {
       return res.status(400).end();
     }
-  }
+  
   let userID = generateRandomString();
   let hashedPassword = bcrypt.hashSync(req.body.password, 10);
 
